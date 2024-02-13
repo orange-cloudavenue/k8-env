@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	webhookConfigName = "sidecar-injector-webhook"
+	webhookConfigName = "env-injector-webhook"
 	webhookInjectPath = "/inject"
 )
 
@@ -40,7 +40,7 @@ func createOrUpdateMutatingWebhookConfiguration(caPEM *bytes.Buffer, webhookServ
 			Name: webhookConfigName,
 		},
 		Webhooks: []admissionregistrationv1.MutatingWebhook{{
-			Name:                    "sidecar-injector.morven.me",
+			Name:                    admissionWebhookAnnotationBase,
 			AdmissionReviewVersions: []string{"v1", "v1beta1"},
 			SideEffects:             &sideEffect,
 			ClientConfig: admissionregistrationv1.WebhookClientConfig{
@@ -66,7 +66,7 @@ func createOrUpdateMutatingWebhookConfiguration(caPEM *bytes.Buffer, webhookServ
 			},
 			NamespaceSelector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
-					"sidecar-injection": "enabled",
+					"env-injection": "enabled",
 				},
 			},
 			FailurePolicy: &fail,
