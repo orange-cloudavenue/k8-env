@@ -149,7 +149,7 @@ func updateAnnotation(target map[string]string, added map[string]string) (patch 
 func createPatch(pod *corev1.Pod, config *Config, annotations map[string]string) ([]byte, error) {
 	var patch []patchOperation
 
-	patch = append(patch, addEnvironnement(pod.Spec.Containers, config.Env, "/spec/container")...)
+	patch = append(patch, addEnvironnement(pod.Spec.Containers, config.Env, "/spec/containers")...)
 	patch = append(patch, updateAnnotation(pod.Annotations, annotations)...)
 
 	return json.Marshal(patch)
