@@ -1,0 +1,86 @@
+project_name: k8-env
+
+before:
+  hooks:
+    # You may remove this if you don't use go modules.
+    - go mod tidy
+
+release:
+  prerelease: auto
+
+
+snapshot:
+  name_template: "{{ .Tag }}"
+
+checksum:
+  name_template: '{{ .ProjectName }}-{{ .Version }}-checksums.txt'
+
+builds:
+  - id: "k8-env"
+    binary: k8-env
+    main: ./cmd
+    ldflags:
+      - '-s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}'
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm
+      - arm64
+    env:
+      - CGO_ENABLED=0
+
+dockers:
+  - goarch: amd64 
+    image_templates:
+    - "ghcr.io/orange-cloudavenue/{{.ProjectName}}:v{{ .Version }}-amd64"
+    extra_files:
+      - prestop.sh
+    dockerfile: Dockerfile
+    use: buildx
+    ids:
+      - k8-env
+    build_flag_templates:
+    - --platform=linux/amd64
+    - --pull
+    - --label=org.opencontainers.image.title={{ .ProjectName }}
+    - --label=org.opencontainers.image.description={{ .ProjectName }}
+    - --label=org.opencontainers.image.url=https://github.com/orange-cloudavenue/{{ .ProjectName }}
+    - --label=org.opencontainers.image.source=https://github.com/orange-cloudavenue/{{.ProjectName}}
+    - --label=org.opencontainers.image.version={{ .Version }}
+    - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
+    - --label=org.opencontainers.image.revision={{ .FullCommit }}
+
+  - goarch: arm64
+    image_templates: 
+    - "ghcr.io/orange-cloudavenue/{{ .ProjectName }}:v{{ .Version }}-arm64v8"
+    extra_files:
+      - prestop.sh
+    dockerfile: Dockerfile
+    use: buildx
+    ids:
+      - k8-env
+    build_flag_templates:
+    - --platform=linux/arm64/v8
+    - --pull
+    - --label=org.opencontainers.image.title={{ .ProjectName }}
+    - --label=org.opencontainers.image.description={{ .ProjectName }}
+    - --label=org.opencontainers.image.url=https://github.com/orange-cloudavenue/{{ .ProjectName }}
+    - --label=org.opencontainers.image.source=https://github.com/orange-cloudavenue/{{ .ProjectName }}
+    - --label=org.opencontainers.image.version={{ .Version }}
+    - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
+    - --label=org.opencontainers.image.revision={{ .FullCommit }}
+
+docker_manifests:
+- name_template: "ghcr.io/orange-cloudavenue/{{ .ProjectName }}:v{{ .Version }}"
+  skip_push: false
+  image_templates:
+  - "ghcr.io/orange-cloudavenue/{{ .ProjectName }}:v{{ .Version }}-amd64"
+  - "ghcr.io/orange-cloudavenue/{{ .ProjectName }}:v{{ .Version }}-arm64v8"
+- name_template: "ghcr.io/orange-cloudavenue/{{ .ProjectName }}:latest"
+  # auto should be used to skip pushing the latest tag when the release is a pre-release
+  skip_push: auto
+  image_templates:
+  - "ghcr.io/orange-cloudavenue/{{ .ProjectName }}:v{{ .Version }}-amd64"
+  - "ghcr.io/orange-cloudavenue/{{ .ProjectName }}:v{{ .Version }}-arm64v8"

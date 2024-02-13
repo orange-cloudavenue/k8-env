@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8-env
+  labels:
+    app: k8-env
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: k8-env
+  template:
+    metadata:
+      labels:
+        app: k8-env
+    spec:
+      serviceAccountName: k8-env
+      containers:
+        - name: k8-env
+          image: k8-env
+          imagePullPolicy: Always
+          env:
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "/usr/bin/prestop.sh"]
+          volumeMounts:
+          - name: webhook-config
+            mountPath: /etc/webhook/config
+      volumes:
+      - name: webhook-config
+        configMap:
+          name: k8-env
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: k8-env
+  labels:
+    app: k8-env
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: k8-env
+subjects:
+- kind: ServiceAccount
+  name: k8-env
+  namespace: k8-env
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: k8-env
+  labels:
+    app: k8-env
+rules:
+- apiGroups: ["admissionregistration.k8s.io"]
+  resources: ["mutatingwebhookconfigurations"]
+  verbs: ["create", "get", "delete", "list", "patch", "update", "watch"]
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: k8-env
+  labels:
+    app: k8-env
+data:
+  env-config.yaml: |
+    env:
+    - name: demo
+      Value: demo
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: k8-env
+  labels:
+    app: k8-env
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: k8-env
+  labels:
+    app: k8-env
+spec:
+  ports:
+  - port: 443
+    targetPort: 8443
+  selector:
+    app: k8-env
