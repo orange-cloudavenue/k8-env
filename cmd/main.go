@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 var (
@@ -72,8 +73,12 @@ func main() {
 	whsvr := &WebhookServer{
 		envConfig: envConfig,
 		server: &http.Server{
-			Addr:      fmt.Sprintf(":%v", port),
-			TLSConfig: &tls.Config{Certificates: []tls.Certificate{pair}},
+			ReadHeaderTimeout: 5 * time.Second,
+			Addr:              fmt.Sprintf(":%v", port),
+			TLSConfig: &tls.Config{
+				Certificates: []tls.Certificate{pair},
+				MinVersion:   tls.VersionTLS12,
+			},
 		},
 	}
 
