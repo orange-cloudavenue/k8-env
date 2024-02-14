@@ -1,7 +1,7 @@
 env:
   - name: HTTP_PROXY
-    Value: http://10.1.2.3:3128
+    Value: "http://10.1.2.3:3128"
   - name: HTTPS_PROXY
-    Value: http://10.1.2.3:3128
+    Value: "http://10.1.2.3:3128"
   - name: NO_PROXY
-    Value: cluster.local,localhost,127.0.0.1
+    Value: "cluster.local,localhost,127.0.0.1"

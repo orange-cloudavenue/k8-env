@@ -103,21 +103,18 @@ func mutationRequired(ignoredList []string, metadata *metav1.ObjectMeta) bool {
 func addEnvironnement(containers []corev1.Container, added []corev1.EnvVar, basePath string) (patch []patchOperation) {
 	// for each containers in the pod spec, append the env vars
 	for i := range containers {
-		// if the container has no env vars, initialize the env vars
-		if containers[i].Env == nil {
-			containers[i].Env = make([]corev1.EnvVar, 0)
+		var path string
+
+		path = basePath + "/" + fmt.Sprintf("%d/env", i)
+		if containers[i].Env != nil {
+			path = basePath + "/" + fmt.Sprintf("%d/env/-", i)
 		}
 
-		// for each env var in the added env vars, append the env var to the container
-		for _, add := range added {
-			// Compute the path for the env var
-			path := basePath + "/" + fmt.Sprintf("%d/env", i)
-			patch = append(patch, patchOperation{
-				Op:    "add",
-				Path:  path,
-				Value: add,
-			})
-		}
+		patch = append(patch, patchOperation{
+			Op:    "add",
+			Path:  path,
+			Value: added,
+		})
 	}
 
 	return patch
