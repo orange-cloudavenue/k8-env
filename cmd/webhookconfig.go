@@ -74,16 +74,17 @@ func createOrUpdateMutatingWebhookConfiguration(caPEM *bytes.Buffer, webhookServ
 	}
 
 	foundWebhookConfig, err := mutatingWebhookConfigV1Client.MutatingWebhookConfigurations().Get(context.TODO(), webhookConfigName, metav1.GetOptions{})
-	if err != nil && apierrors.IsNotFound(err) {
+	switch {
+	case err != nil && apierrors.IsNotFound(err):
 		if _, err := mutatingWebhookConfigV1Client.MutatingWebhookConfigurations().Create(context.TODO(), mutatingWebhookConfig, metav1.CreateOptions{}); err != nil {
 			warningLogger.Printf("Failed to create the mutatingwebhookconfiguration: %s", webhookConfigName)
 			return err
 		}
 		infoLogger.Printf("Created mutatingwebhookconfiguration: %s", webhookConfigName)
-	} else if err != nil {
+	case err != nil:
 		warningLogger.Printf("Failed to check the mutatingwebhookconfiguration: %s", webhookConfigName)
 		return err
-	} else {
+	default:
 		// there is an existing mutatingWebhookConfiguration
 		if len(foundWebhookConfig.Webhooks) != len(mutatingWebhookConfig.Webhooks) ||
 			!(foundWebhookConfig.Webhooks[0].Name == mutatingWebhookConfig.Webhooks[0].Name &&

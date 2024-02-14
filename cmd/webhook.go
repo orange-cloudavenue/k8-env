@@ -65,7 +65,7 @@ func loadConfig(configFile string) (*Config, error) {
 	return &cfg, nil
 }
 
-// Check whether the target resoured need to be mutated
+// Check whether the target resoured need to be mutated.
 func mutationRequired(ignoredList []string, metadata *metav1.ObjectMeta) bool {
 	// skip special kubernete system namespaces
 	for _, namespace := range ignoredList {
@@ -99,7 +99,7 @@ func mutationRequired(ignoredList []string, metadata *metav1.ObjectMeta) bool {
 	return required
 }
 
-// addEnvironnement add environnement to the target container
+// addEnvironnement add environnement to the target container.
 func addEnvironnement(containers []corev1.Container, added []corev1.EnvVar, basePath string) (patch []patchOperation) {
 	// for each containers in the pod spec, append the env vars
 	for i := range containers {
@@ -120,7 +120,7 @@ func addEnvironnement(containers []corev1.Container, added []corev1.EnvVar, base
 	return patch
 }
 
-func updateAnnotation(target map[string]string, added map[string]string) (patch []patchOperation) {
+func updateAnnotation(target, added map[string]string) (patch []patchOperation) {
 	for key, value := range added {
 		if target == nil || target[key] == "" {
 			target = map[string]string{}
@@ -142,7 +142,7 @@ func updateAnnotation(target map[string]string, added map[string]string) (patch 
 	return patch
 }
 
-// create mutation patch for resoures
+// create mutation patch for resoures.
 func createPatch(pod *corev1.Pod, config *Config, annotations map[string]string) ([]byte, error) {
 	var patch []patchOperation
 
@@ -152,7 +152,7 @@ func createPatch(pod *corev1.Pod, config *Config, annotations map[string]string)
 	return json.Marshal(patch)
 }
 
-// main mutation process
+// main mutation process.
 func (whsvr *WebhookServer) mutate(ar *admissionv1.AdmissionReview) *admissionv1.AdmissionResponse {
 	req := ar.Request
 	var pod corev1.Pod
@@ -197,7 +197,7 @@ func (whsvr *WebhookServer) mutate(ar *admissionv1.AdmissionReview) *admissionv1
 	}
 }
 
-// Serve method for webhook server
+// Serve method for webhook server.
 func (whsvr *WebhookServer) serve(w http.ResponseWriter, r *http.Request) {
 	var body []byte
 	if r.Body != nil {
@@ -250,7 +250,7 @@ func (whsvr *WebhookServer) serve(w http.ResponseWriter, r *http.Request) {
 		warningLogger.Printf("Can't encode response: %v", err)
 		http.Error(w, fmt.Sprintf("could not encode response: %v", err), http.StatusInternalServerError)
 	}
-	infoLogger.Printf("Ready to write reponse ...")
+	infoLogger.Printf("Ready to write response ...")
 	if _, err := w.Write(resp); err != nil {
 		warningLogger.Printf("Can't write response: %v", err)
 		http.Error(w, fmt.Sprintf("could not write response: %v", err), http.StatusInternalServerError)
