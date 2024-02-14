@@ -29,6 +29,6 @@ jobs:
           commit_message: "chore: Update CHANGELOG.md"
           commit_options: '--no-verify --signoff'
           file_pattern: CHANGELOG.md
-          commit_user_name: Changelog[bot]
-          commit_user_email: changelog-bot@orange.com
-          commit_author: Changelog Bot <changelog-bot@orange.com>
+          commit_user_name: github-actions[bot]
+          commit_user_email: github-actions[bot]@users.noreply.github.com
+          commit_author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>

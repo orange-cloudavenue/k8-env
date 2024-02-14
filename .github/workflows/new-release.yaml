@@ -163,19 +163,19 @@ jobs:
           args: release --clean -f .goreleaser.yaml --release-notes=${{ steps.release-notes-download.outputs.download-path }}/release-notes.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  trigger-doc-update:
-    needs: [release-app, pre-check]
-    runs-on: ubuntu-latest
-    if: needs.pre-check.outputs.PRERELEASE == 'false'
-    steps:
-      - name: Repository Dispatch
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          event-type: update-doc
+  # trigger-doc-update:
+  #   needs: [release-app, pre-check]
+  #   runs-on: ubuntu-latest
+  #   if: needs.pre-check.outputs.PRERELEASE == 'false'
+  #   steps:
+  #     - name: Repository Dispatch
+  #       uses: peter-evans/repository-dispatch@v3
+  #       with:
+  #         event-type: update-doc
   highest-version-tag:
     needs: [pre-check,release-app]
     runs-on: ubuntu-latest
-    if: needs.pre-check.outputs.PRERELEASE == 'false'
+    if: ${{ needs.pre-check.outputs.PRERELEASE == 'false' }}
     outputs:
       tag: ${{ steps.highest-version-tag.outputs.tag }}
     steps:
@@ -190,11 +190,7 @@ jobs:
           echo "tag=$HIGHEST" >> "$GITHUB_OUTPUT"
   changelog-newversion:
     needs: [release-app, highest-version-tag, pre-check]
-    # write new changelog header only if release tag is the $HIGHEST i.e. exists on main
-    # and not a backport release branch (e.g. release/3.x). This results in
-    # manually updating the CHANGELOG header if releasing from the non-default branch.
-    # TODO: find a more deterministic way to determine release branch from tag commit
-    if: github.ref_name == needs.highest-version-tag.outputs.tag && needs.pre-check.outputs.PRERELEASE == 'false'
+    if: github.ref_name == needs.highest-version-tag.outputs.tag
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v3.5.3 
@@ -228,7 +224,7 @@ jobs:
           commit_message: "chore: Update CHANGELOG.md after ${{ github.ref_name }}"
           commit_options: '--no-verify --signoff'
           file_pattern: CHANGELOG.md
-          commit_user_name: Changelog[bot]
-          commit_user_email: changelog-bot@orange.com
-          commit_author: Changelog Bot <changelog-bot@orange.com>
+          commit_user_name: github-actions[bot]
+          commit_user_email: github-actions[bot]@users.noreply.github.com
+          commit_author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
 
